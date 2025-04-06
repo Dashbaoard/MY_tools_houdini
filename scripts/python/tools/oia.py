@@ -1,0 +1,2 @@
+def printHollow():
+	print('Hollow')

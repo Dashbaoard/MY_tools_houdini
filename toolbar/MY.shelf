@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="rbw" label="MY">
+    <memberTool name="reload_pak_mod"/>
+    <memberTool name="bfs"/>
+    <memberTool name="usd_traversal"/>
+    <memberTool name="manager"/>
+  </toolshelf>
+
+  <tool name="reload_pak_mod" label="Reload Packages and Modules" icon="PLASMA_App">
+    <helpText><![CDATA["""Press Alt Key and click to reload the modules."""
+]]></helpText>
+    <script scriptType="python"><![CDATA[import rbw_utils
+
+rbw_utils.reload_package(kwargs)]]></script>
+  </tool>
+
+  <tool name="bfs" label="bfs" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+
+def find_offset(node):
+    for parm in node.parms():
+        print(parm.name())
+        if parm.name() == "xn__inputsintensity_i0a":
+            return True
+            
+def bfs(root):
+    queue = [root]
+    while len(queue) > 0:
+        current = queue.pop(0)
+        print(current)
+        if find_offset(current):
+            print("Parameter offset found in node {}".format(current))
+            #current.parm('xn__inputsintensity_i0a').set(5)
+            current.parm('xn__inputsintensity_i0a').set(7)
+            break
+            
+        for node in current.outputs():
+            queue.append(node)
+            
+root_nodes = hou.selectedNodes()
+
+for root in root_nodes:
+    bfs(root)]]></script>
+  </tool>
+
+  <tool name="usd_traversal" label="usd_traversal" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+# import usd_utils
+import usd_traversal
+reload(usd_traversal)
+root = hou.selectedNodes()[0]
+
+graph = usd_traversal.UsdTraversal()
+
+graph.setNewPath(root)]]></script>
+  </tool>
+
+  <tool name="manager" label="manager" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+
+import project_manager
+reload(project_manager)]]></script>
+  </tool>
+</shelfDocument>

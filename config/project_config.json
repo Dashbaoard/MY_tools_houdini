@@ -1,0 +1,52 @@
+[
+    {
+        "cc3": {
+            "PROJECT_ACTIVE": false,
+            "PROJECT_CODE": "cc3",
+            "PROJECT_FOLDERS": [
+                "geo",
+                " hda",
+                " sim",
+                " abc",
+                " tex",
+                " render",
+                " flip",
+                " scripts",
+                " comp",
+                " audio",
+                " video",
+                " desk",
+                " cache",
+                " seq",
+                " assets"
+            ],
+            "PROJECT_FPS": "24",
+            "PROJECT_PATH": "cc3"
+        }
+    },
+    {
+        "cc7": {
+            "PROJECT_ACTIVE": false,
+            "PROJECT_CODE": "cc7",
+            "PROJECT_FOLDERS": [
+                "geo",
+                "hda",
+                "sim",
+                "abc",
+                "tex",
+                "render",
+                "flip",
+                "scripts",
+                "comp",
+                "audio",
+                "video",
+                "desk",
+                "cache",
+                "seq",
+                "assets"
+            ],
+            "PROJECT_FPS": "24",
+            "PROJECT_PATH": "C:/Users/JiDong/Documents/maya/cc7"
+        }
+    }
+]

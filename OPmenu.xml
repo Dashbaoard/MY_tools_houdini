@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<menuDocument>
+
+	<menu>
+
+		<subMenu id="rebelway_menu">
+
+		<label>RBW</label>
+
+			<scriptItem id="Print Version">
+
+				<label>Split Geo</label>
+                <expression>
+                <![CDATA[
+node = kwargs.get("node", None)                
+check_node = node.type().category().name()
+
+if check_node == "Sop":
+    return True
+else:
+    return False                
+                
+                ]]>
+                </expression>
+				<scriptCode><![CDATA[
+from tools import split_geo           
+split_geo.split_geo()                
+            ]]></scriptCode>
+
+			</scriptItem>
+
+		</subMenu>
+
+	</menu>
+
+</menuDocument>
