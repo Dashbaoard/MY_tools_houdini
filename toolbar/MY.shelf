@@ -10,6 +10,7 @@
     <memberTool name="bfs"/>
     <memberTool name="usd_traversal"/>
     <memberTool name="manager"/>
+    <memberTool name="usd_template"/>
   </toolshelf>
 
   <tool name="reload_pak_mod" label="Reload Packages and Modules" icon="PLASMA_App">
@@ -68,5 +69,16 @@ from importlib import reload
 
 import project_manager
 reload(project_manager)]]></script>
+  </tool>
+
+  <tool name="usd_template" label="usd_template" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import sys
+
+import usd_migration_tools
+reload(usd_migration_tools)
+
+template1 = usd_migration_tools.USDMigrationUtils()
+template1.createMainTemplate('C:/baidunetdiskdownload/Land_Rover/Dodge-Monaco-1974-Bluesmobile')]]></script>
   </tool>
 </shelfDocument>
