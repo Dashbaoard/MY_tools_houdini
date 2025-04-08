@@ -1,0 +1,35 @@
+{
+    "enable": true,
+    "load_package_once": true,
+    "env":
+    [
+        {
+            "HTOA_PY_SUFFIX": [
+                {"houdini_python=='python3.10'": ".py310"}
+            ]
+        },
+        {
+            "HTOA_GCC_SUFFIX":
+            [
+                {"houdini_os=='linux' and houdini_platform_build=='gcc.9.3'":  "_gcc9"},
+                {"houdini_os=='linux' and houdini_platform_build=='gcc.11.2'": "_gcc11"}
+            ]
+        },
+        {"HTOA_ROOT": "C:/Users/19425/htoa/htoa-6.3.3.1_r0a4e17e_houdini-20.5.278/htoa-6.3.3.1_r0a4e17e_houdini-20.5.278"},
+        {"HTOA_ROOT": "${HTOA_ROOT}${HTOA_PY_SUFFIX}${HTOA_GCC_SUFFIX}"},
+        {"HOUDINI_PATH": [
+                {
+                    "value": "$HTOA_ROOT",
+                    "method": "prepend"
+                }
+            ]
+        },
+        {"PATH": [
+                {
+                    "value": "$HTOA_ROOT/scripts/bin",
+                    "method": "prepend"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+  "enable":true,
+  "env": [
+    {
+      "RBW":"C:/chajian/python/houdini/MY_tools_houdini"
+    },
+    {
+      "VAR":10
+    }
+  ],
+  "hpath":"$RBW"
+}
