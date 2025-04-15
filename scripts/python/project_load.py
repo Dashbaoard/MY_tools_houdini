@@ -5,8 +5,8 @@ import json
 
 from PySide2 import QtCore, QtUiTools, QtWidgets, QtGui
 
-from genshi.template.loader import directory
-from jinja2.nodes import Break
+# from genshi.template.loader import directory
+# from jinja2.nodes import Break
 
 
 class MyProject(QtWidgets.QMainWindow):

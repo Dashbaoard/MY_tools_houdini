@@ -5,20 +5,22 @@ import hou
 
 class USDMigrationUtils:
     def __init__(self):
-        pass
+        self.asset_name = None
 
     def test(self):
         print('Hello')
 
     def createMainTemplate(self, dir_path):
-        print('Executing template structure')
+        print('Executing template structure...')
 
         obj_file = [file for file in os.listdir(dir_path) if file.endswith('.obj')][0]
         print(obj_file)
 
+        self.asset_name = obj_file[:-4]
+
         # sopCreate lop
         root_path = '/stage'
-        sopcreate_lop = hou.node(root_path).createNode('sopcreate', 'asset01')
+        sopcreate_lop = hou.node(root_path).createNode('sopcreate', self.asset_name)
         sopcreate_lop.parm('enable_partitionattribs').set(0)
 
         #file sop
@@ -46,7 +48,7 @@ class USDMigrationUtils:
         for_each_end.parm('class').set(0)
         for_each_end.parm('useattrib').set(1)
         for_each_end.parm('attrib').set('shop_materialpath')
-        for_each_end.parm('blockpath').set('../foreach_end1')
+        for_each_end.parm('blockpath').set('../foreach_begin1')
         for_each_end.parm('templatepath').set('../foreach_begin1')
 
         # attrib delete
@@ -58,7 +60,7 @@ class USDMigrationUtils:
 
         # create primitive lop
         primitive_lop = hou.node(root_path).createNode('primitive')
-        primitive_lop.parm('primpath').set('/asset01')
+        primitive_lop.parm('primpath').set(self.asset_name)
         primitive_lop.parm('primkind').set('component')
 
         # graft stages
@@ -73,9 +75,9 @@ class USDMigrationUtils:
 
         for i, material in enumerate(materials):
             materiallib_lop.parm(f'matnode{i+1}').set(material)
-            materiallib_lop.parm(f'matpath{i+1}').set(f'/asset01/materials/{material}_mat')
+            materiallib_lop.parm(f'matpath{i+1}').set(f'/{self.asset_name}/materials/{material}_mat')
             materiallib_lop.parm(f'assign{i+1}').set(1)
-            materiallib_lop.parm(f'geopath{i+1}').set(f'/asset01/asset01/{material}')
+            materiallib_lop.parm(f'geopath{i+1}').set(f'/{self.asset_name}/{self.asset_name}/{material}')
 
             # set mat network inside
             mat_network = hou.node(materiallib_lop.path()).createNode('subnet', material)
@@ -92,7 +94,7 @@ class USDMigrationUtils:
                 texture_map_color = [file for file in os.listdir(texture_dir_ref) if file.endswith('3.jpg')]
             elif material == 'leaves_small':
                 texture_map_color = [file for file in os.listdir(texture_dir_ref) if file.endswith('4.jpg')]
-            print(texture_map_color)
+
             usd_uv_texture.parm('file').set(texture_dir_ref + '/' + texture_map_color[0])
 
             mtlsurface = hou.node(mat_network.path()).createNode('mtlxstandard_surface')
@@ -107,6 +109,11 @@ class USDMigrationUtils:
 
             mat_network.setMaterialFlag(True)
 
+        # usd rop export
+        rop_export = materiallib_lop.createOutputNode('usd_rop')
+        rop_export.parm('lopoutput').set(dir_path + '/usd_export' + self.asset_name + '.usdz')
+
+batch_process_usd(DIRPATH)
 
 
 

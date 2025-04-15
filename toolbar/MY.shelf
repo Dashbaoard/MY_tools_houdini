@@ -80,7 +80,7 @@ import usd_migration_tools
 reload(usd_migration_tools)
 
 template1 = usd_migration_tools.USDMigrationUtils()
-template1.createMainTemplate('C:/baidunetdiskdownload/Land_Rover/Dodge-Monaco-1974-Bluesmobile')]]></script>
+template1.createMainTemplate('C:/baidunetdiskdownload/Land_Rover/Dodge_Monaco_1974_Bluesmobile')]]></script>
   </tool>
 
   <tool name="project" label="Project" icon="PLASMA_App">
