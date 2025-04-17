@@ -428,12 +428,20 @@ class MyProject(QtWidgets.QMainWindow):
                 if current_project in project:
                     project_data = project[current_project]
                     seq_path = os.path.join(project_data['PROJECT_PATH'], "seq", current_sequence).replace(os.sep, "/")
+                    # file_path = seq_path + '/hip'
                     if os.path.exists(seq_path):
                         files = []
 
-                        for file in os.listdir(seq_path):
-                            if os.path.isfile(os.path.join(seq_path, file)):
-                                files.append(file)
+                        # 使用 os.walk 遍历 seq 文件夹及其所有子文件夹
+                        for root, dirs, filenames in os.walk(seq_path):
+                            for filename in filenames:
+                                # 构建从 sequence1 开始的相对路径
+                                relative_path = os.path.relpath(root, seq_path).replace(os.sep, "/")
+                                if relative_path == ".":
+                                    full_path = filename
+                                else:
+                                    full_path = os.path.join(relative_path, filename).replace(os.sep, "/")
+                                files.append(full_path)
 
                         files.sort()
 
@@ -533,15 +541,19 @@ class MyProject(QtWidgets.QMainWindow):
         # Create new save tool window with the project information
         if not self.save_tool_window:
             self.save_tool_window = SaveToolWindow(project_data, scene_name, project_name)
+            # Connect the file saved signal to load the method load_hip_files
+            self.save_tool_window.file_saved.connect(self.load_files)
         else:
             # Update existing window with the new project information
             self.save_tool_window.project_data = project_data
             self.save_tool_window.scene_name = scene_name
             self.save_tool_window.project_name = project_name
             self.save_tool_window.update_project_info()
+            self.save_tool_window.update_preview_path()
 
         self.save_tool_window.show()
         self.save_tool_window.raise_()
+
 
 win = MyProject()
 win.show()

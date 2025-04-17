@@ -1,9 +1,25 @@
+import os
 import hou
 
 from PySide2 import QtCore, QtWidgets
 import glob
 
+
 class SaveToolWindow(QtWidgets.QWidget):
+    # Class constants
+    STAGES = ["MAIN", "DEV", "WIP"]
+    DEPARTMENTS =  ['GEN', 'ANIM', 'CFX', 'ENV', 'FX', 'LRC', 'RIG', 'LAYOUT']
+    LICENSE_TYPE = {
+        "Commercial": 'hip',
+        'Indie': 'hiplc',
+        'Apprentice': 'hipnc',
+        'ApprenticeHD': 'hipnc',
+        'Education': 'hipnc'
+    }
+
+    # Create a custom signal for file saved
+    file_saved = QtCore.Signal()
+
     def __init__(self, project_data=None, scene_name=None, project_name=None):
         super().__init__()
 
@@ -21,6 +37,7 @@ class SaveToolWindow(QtWidgets.QWidget):
         self._init_ui()
         self._setup_connections()
         self.update_project_info()
+        self.update_preview_path()
 
     def _init_ui(self):
         """ Initialize the UI components. """
@@ -40,11 +57,11 @@ class SaveToolWindow(QtWidgets.QWidget):
         # Create the combo boxes
         self.stage_combo = QtWidgets.QComboBox()
         self.stage_combo.setMinimumHeight(25)
-        self.stage_combo.addItems(['MAIN', 'DEV', 'WIP'])
+        self.stage_combo.addItems(self.STAGES)
 
         self.dept_combo = QtWidgets.QComboBox()
         self.dept_combo.setMinimumHeight(25)
-        self.dept_combo.addItems(['GEN', 'ANIM', 'CFX', 'ENV', 'FX', 'LRC', 'RIG', 'LAYOUT'])
+        self.dept_combo.addItems(self.DEPARTMENTS)
 
         # Create text inputs
         self.file_name = QtWidgets.QLineEdit()
@@ -79,6 +96,10 @@ class SaveToolWindow(QtWidgets.QWidget):
 
     def _setup_connections(self):
         """ Setup the signal connections """
+        self.stage_combo.currentTextChanged.connect(self.update_preview_path)
+        self.dept_combo.currentTextChanged.connect(self.update_preview_path)
+        self.file_name.textChanged.connect(self.update_preview_path)
+        self.save_button.clicked.connect(self.save_file)
 
     def update_project_info(self):
         """ Update the project info label """
@@ -104,19 +125,16 @@ class SaveToolWindow(QtWidgets.QWidget):
 
         # Get user and license information
         get_user = hou.getenv("USER")
-        license_type = {
-            "Commerrial": 'hip',
-            'Indie': 'hiplc',
-            'Apprentice': 'hipnc',
-            'ApprenticeHD': 'hipnc',
-            'Education': 'hipnc'
-        }
+
         get_license = hou.licenseCategory().name()
-        extension = license_type[get_license]
+        extension = self.LICENSE_TYPE[get_license]
 
         # Create the path
         base_path = f'{project_path}/seq/{self.scene_name}/hip/{stage.lower()}_{dept.lower()}_{file_name.lower()}_{get_user.lower()}_{extension}'
         next_version = self.get_next_version(base_path)
+
+        save_path = f"{base_path}_v{next_version:03d}.{extension}"
+        self.line_preview.setText(save_path)
 
     def get_next_version(self, base_path):
         """
@@ -126,15 +144,9 @@ class SaveToolWindow(QtWidgets.QWidget):
         Returns:
             int: Next version number
         """
-        license_type = {
-            "Commerrial": 'hip',
-            'Indie': 'hiplc',
-            'Apprentice': 'hipnc',
-            'ApprenticeHD': 'hipnc',
-            'Education': 'hipnc'
-        }
+
         get_license = hou.licenseCategory().name()
-        extension = license_type[get_license]
+        extension = self.LICENSE_TYPE[get_license]
 
         # Look for existings version
         pattern = f"{base_path}_v[0-9][0-9][0-9].{extension}"
@@ -148,6 +160,7 @@ class SaveToolWindow(QtWidgets.QWidget):
         for file in existing_files:
             try:
                 #Extract version number from filename.
+
                 version_str = file.split('_v')[-1].split('.')[0]
                 version_num = int(version_str)
                 versions.append(version_num)
@@ -157,5 +170,37 @@ class SaveToolWindow(QtWidgets.QWidget):
         if not versions:
             return 1
 
+        return max(versions) + 1
+
+    def save_file(self):
+        """save the Houdini file"""
+
+        if not self.file_name or not self.scene_name:
+            hou.ui.displayMessage('Please select a project and scene first', severity=hou.severity.Error)
+            return
+
+        save_path = self.line_preview.text()
+
+        try:
+            # Create the directory if it doesn't exist
+            save_dir = os.path.dirname(save_path)
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
+            # Save the Houdini File
+            hou.hipFile.save(save_path)
+            hou.ui.displayMessage(f'File saved successfully : {save_path}', severity=hou.severityType.Message)
+
+            self.update_preview_path()
+            # Emit the signal that the file was saved
+            self.file_saved.emit()
+        except PermissionError:
+            hou.ui.displayMessage("Permission Denied. Cannot save to specified locations")
+
+        except OSError as e:
+            hou.ui.displayMessage(f"Error saving the file: {str(e)}", severity=hou.severityType.Error)
+
+        except Exception as e:
+            hou.ui.displayMessage(f"Unexpected error: {str(e)}", severity=hou.severityType.Error)
 # win = SaveToolWindow()
 # win.show()

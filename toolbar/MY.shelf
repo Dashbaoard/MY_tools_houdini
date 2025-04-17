@@ -12,6 +12,8 @@
     <memberTool name="manager"/>
     <memberTool name="usd_template"/>
     <memberTool name="project"/>
+    <memberTool name="scene_cache_manager"/>
+    <memberTool name="tex_to_mtlx.py"/>
   </toolshelf>
 
   <tool name="reload_pak_mod" label="Reload Packages and Modules" icon="PLASMA_App">
@@ -80,7 +82,7 @@ import usd_migration_tools
 reload(usd_migration_tools)
 
 template1 = usd_migration_tools.USDMigrationUtils()
-template1.createMainTemplate('C:/baidunetdiskdownload/Land_Rover/Dodge_Monaco_1974_Bluesmobile')]]></script>
+template1.createMainTemplate('C:/baidunetdiskdownload/Land_Rover/Dodge-Monaco-1974-Bluesmobile')]]></script>
   </tool>
 
   <tool name="project" label="Project" icon="PLASMA_App">
@@ -256,5 +258,27 @@ win.show()
 # Check if the JSON file exists - append
 # if not create new file
 # window = with the information that was saved]]></script>
+  </tool>
+
+  <tool name="scene_cache_manager" label="Cache Manager" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+
+import scene_cache_manager
+reload(scene_cache_manager)
+
+win = scene_cache_manager.SceneCacheManagerUI()
+win.show()]]></script>
+  </tool>
+
+  <tool name="tex_to_mtlx.py" label="TxToMtlx" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+
+import tex_to_mtlx
+reload(tex_to_mtlx)
+
+win = tex_to_mtlx.TxToMtlx()
+win.show()]]></script>
   </tool>
 </shelfDocument>
