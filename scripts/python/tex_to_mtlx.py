@@ -60,7 +60,7 @@ class TxToMtlx(QtWidgets.QMainWindow):
                 'bump', 'bmp', 'height', 'displacement', 'displace', 'disp', 'heightmap', 'user', 'mask',
                 'normal', 'nor', 'nrm', 'nrml', 'norm'
                 ]
-        self.texture_list = None
+        self.texture_list = {}
         self.UDIM_PATTERN = re.compile(r'(?:_)?(\d{4}())')
         self.SIZE_PATTERN = re.compile(r'(?:_)?(\d+[kk])')
 

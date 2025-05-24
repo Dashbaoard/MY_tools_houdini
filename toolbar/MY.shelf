@@ -14,6 +14,7 @@
     <memberTool name="project"/>
     <memberTool name="scene_cache_manager"/>
     <memberTool name="tex_to_mtlx.py"/>
+    <memberTool name="lops_asset_builder"/>
   </toolshelf>
 
   <tool name="reload_pak_mod" label="Reload Packages and Modules" icon="PLASMA_App">
@@ -280,5 +281,16 @@ reload(tex_to_mtlx)
 
 win = tex_to_mtlx.TxToMtlx()
 win.show()]]></script>
+  </tool>
+
+  <tool name="lops_asset_builder" label="Lops Asset Builder" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+
+import tools.lops_asset_builder as lops_asset_builder
+reload(lops_asset_builder)
+
+
+lops_asset_builder.create_component_builder()]]></script>
   </tool>
 </shelfDocument>

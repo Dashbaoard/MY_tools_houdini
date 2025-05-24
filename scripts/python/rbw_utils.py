@@ -14,7 +14,8 @@ def reload_package(kwargs):
     import os
     import sys
     # reload the package
-    package_path = hou.text.expandString("$HOUDINI_USER_PREF_DIR/packages/") + 'my_tools.json'
+    # package_path = hou.text.expandString("$HOUDINI_USER_PREF_DIR/packages/") + 'my_tools.json'
+    package_path = hou.text.expandString("$RBW/packages/") + 'my_tools.json'
 
     hou.ui.reloadPackage(package_path)
 
