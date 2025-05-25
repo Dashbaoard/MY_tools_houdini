@@ -15,6 +15,8 @@
     <memberTool name="scene_cache_manager"/>
     <memberTool name="tex_to_mtlx.py"/>
     <memberTool name="lops_asset_builder"/>
+    <memberTool name="lops_light_rig"/>
+    <memberTool name="lops_lookdev_camera"/>
   </toolshelf>
 
   <tool name="reload_pak_mod" label="Reload Packages and Modules" icon="PLASMA_App">
@@ -292,5 +294,27 @@ reload(lops_asset_builder)
 
 
 lops_asset_builder.create_component_builder()]]></script>
+  </tool>
+
+  <tool name="lops_light_rig" label="Lops Light Rig" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+
+import tools.lops_light_rig as lops_light_rig
+reload(lops_light_rig)
+
+
+lops_light_rig.create_three_point_light()]]></script>
+  </tool>
+
+  <tool name="lops_lookdev_camera" label="Lops LookdevCamera" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+from importlib import reload
+
+import tools.lops_lookdev_camera as lops_lookdev_camera
+reload(lops_lookdev_camera)
+
+
+lops_lookdev_camera.create_lookdev_camera()]]></script>
   </tool>
 </shelfDocument>

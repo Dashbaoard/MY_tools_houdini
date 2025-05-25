@@ -222,10 +222,8 @@ class TxToMtlx(QtWidgets.QMainWindow):
         """Get the details for the texture inside a folder."""
         try:
 
-            self.texture_list = defaultdict(lambda: defaultdict(list))
+            texture_list = defaultdict(lambda: defaultdict(list))
 
-            # self.texture_list['stone']['albedo'].append(file)
-            # self.texture_list['metal']['albedo'].append(file)
             # Validate the path
             if not os.path.exists(path):
                 raise ValueError(f'Path does not exist: {path}')
@@ -265,18 +263,21 @@ class TxToMtlx(QtWidgets.QMainWindow):
                 udim_match = self.UDIM_PATTERN.search(file)
                 size_match = self.SIZE_PATTERN.search(file)
 
+                # Add Path
+                texture_list[material_name]['path'] = path
+
                 # Update texture list
-                self.texture_list[material_name][texture_type].append(file)
-                self.texture_list[material_name]["UDIM"] = bool(udim_match)
+                texture_list[material_name][texture_type].append(file)
+                texture_list[material_name]["UDIM"] = bool(udim_match)
                 if size_match:
-                    self.texture_list[material_name]["Size"] =size_match.group(1)
+                    texture_list[material_name]["Size"] =size_match.group(1)
 
             # Convert default dict to regular dictionary
             _new_dict = {}
-            for mat, tex_data in self.texture_list.items():
+            for mat, tex_data in texture_list.items():
                 _new_dict[mat] = dict(tex_data)
 
-            self.texture_list = _new_dict
+            self.texture_list.update(_new_dict)
 
             # Update the UI
             self.model.clear()
@@ -286,6 +287,7 @@ class TxToMtlx(QtWidgets.QMainWindow):
             self.bt_sel_all.setEnabled(True)
             self.bt_sel_non.setEnabled(True)
 
+            return self.texture_list
         except Exception as e:
             hou.ui.displayMessage(f'Error retrieving texture details: {str(e)}', severity = hou.severityType.Error)
 
@@ -938,7 +940,7 @@ class MtlxMaterial:
             bump_image.parm("signature").set("float")
             bump_image.parm("filecolorspace").set("raw")
             bump_path = self._get_texture_path(bump_normal_data["bump"], material_lib_info)
-            print(bump_path)
+
             bump_image.parm("file").set(bump_path)
 
             if placed2d and not material_lib_info.get("UDIM", True):
@@ -967,10 +969,10 @@ class MtlxMaterial:
 
         input_names = mtlx_standard_surf.inputNames()
         bump_normal_data = self._find_bump_normal_textures(material_lib_info)
-        print(bump_normal_data)
+
 
         if not any(bump_normal_data.values()):
-            print('cccc')
+
             return
 
         if bump_normal_data['bump'] and bump_normal_data['normal']:
