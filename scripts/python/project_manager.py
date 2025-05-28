@@ -6,13 +6,11 @@ import shutil
 import pdb
 
 from PySide2 import QtCore, QtUiTools, QtWidgets, QtGui
-
-from genshi.template.loader import directory
-from jinja2.nodes import Break
+from save_tool import SaveToolWindow
 
 
 class MyProject(QtWidgets.QMainWindow):
-    # class constant
+    # Class Constant
     CONFIG_DIR = "$RBW/config"
     CONFIG_FILE = "project_config.json"
     UI_FILE = "$RBW/ui/project_manager.ui"
@@ -25,9 +23,13 @@ class MyProject(QtWidgets.QMainWindow):
         self._setup_connections()
         # STORE PROJECT DATA
         self.project_data = []
+        # JSON file path
+        # self.config_path = hou.text.expandString("$RBW/config")
+        self.json_path = os.path.join(hou.text.expandString(self.CONFIG_DIR), self.CONFIG_FILE)
 
         # LOAD PROJECTS WHEN INITIALIZING
         self.load_projects()
+        self.save_tool_window = None
 
     def _init_ui(self):
         """
@@ -73,7 +75,8 @@ class MyProject(QtWidgets.QMainWindow):
         self.create_scene.clicked.connect(self.create_project_folder)
         self.delete_scene.clicked.connect(self.delete_project_folder)
         self.open_file.clicked.connect(self.open_project_file)
-        self.save_file.clicked.connect(self.save_project_file)
+        # self.save_file.clicked.connect(self.save_project_file)
+        self.save_file.clicked.connect(self.show_save_tool)
 
     def handle_item_change(self, current, previous):
         """
@@ -117,28 +120,38 @@ class MyProject(QtWidgets.QMainWindow):
     def load_projects(self):
         """
         Load project from JSON file and populate the project list.
+        Checks which project is set to active inside the JSON file and selects it
+        in the widget list
         """
         try:
-            path = hou.text.expandString("$RBW/config")
-            json_path = os.path.join(path, "project_config.json")
-
-            with open(json_path, "r") as file:
+            with open(self.json_path, "r") as file:
                 self.project_data = json.load(file)
 
             project_names = []
+            active_project_index = 0
 
-            for project in self.project_data:
+            for index, project in enumerate(self.project_data):
                 project_name = list(project.keys())[0]
                 project_names.append(project_name)
 
+                if project[project_name].get("PROJECT_ACTIVE", False):
+                    active_project_index = index
+            # Clears any previous items in the list
             self.project_list.clear()
+
+            # Adds sorted project names to the list widget
             project_names.sort()
 
             # add sorted project names to the list widget
             for name in project_names:
                 self.project_list.addItem(name)
 
-            self.status_line.setText(f"{json_path}was loaded")
+            self.status_line.setText(f"{self.json_path}was loaded")
+
+            # Select first item
+            if self.project_list.count() > 0:
+                sorted_active_index = project_names.index(list(self.project_data[active_project_index].keys())[0])
+                self.project_list.setCurrentRow(sorted_active_index)
 
         except Exception as e:
             self.status_line.setText("No project was found")
@@ -171,12 +184,25 @@ class MyProject(QtWidgets.QMainWindow):
         """
 
         project_name, project_data = self.get_selected_projects()
+        if not project_name:
+            return
 
+        # Find the project data and set up env var
         env_vars = {"JOB":"", "CODE":"", "FPS":"", "PROJECT":"" }
-        project_name = self.project_list.currentItem().text()
+
+        # project_name = self.project_list.currentItem().text()
 
         if status:
             if project_data:
+                # Update JSON file - set all projects to inactive except the current
+                for project in self.projects_data:
+                    current_project_name = list(project.keys())[0]
+                    project[current_project_name]["PROJECT_ACTIVE"] = {current_project_name == project_name}
+
+                # Write changes to JSON file
+                with open(self.json_path, "w") as file:
+                    json.dump(self.projects_data, file, sort_keys=True, indent=4)
+                # Update environment variables
                 env_vars.update(
                     {
                         "JOB":project_data['PROJECT_PATH'],
@@ -192,6 +218,15 @@ class MyProject(QtWidgets.QMainWindow):
                 return
 
         else:
+            # When disabling, set project to inactive in the JSON file
+            for project in self.projects_data:
+                if project_name in project:
+                    project[project_name]["PROJECT_ACTIVE"] = False
+
+            # Write changes to the JSON file
+            with open(self.json_path, "w") as file:
+                json.dump(self.projects_data, file, sort_keys=True, indent=4)
+
             status_msg = f"Project '{project_name}' is disabled."
 
         for var, value in env_vars.items():
@@ -204,15 +239,18 @@ class MyProject(QtWidgets.QMainWindow):
         """
         Remove the selected project from the JSON file, the list widget and deletes the folder.
         """
+        project_name, project_data = self.get_selected_projects()
+        if not project_name:
+            return
         if not self.project_list.selectedItems():
             self.update_status("Please select a project.", hou.severityType.Error)
             return
-        current_item = self.project_list.currentItem().text()
+        # current_item = self.project_list.currentItem().text()
 
         # Confirmation from the user
 
         confirm_delete = hou.ui.displayMessage(
-            f"Are you sure you want to delete {current_item}?\n"
+            f"Are you sure you want to delete {project_name}?\n"
             f"ATTENTION!!! - This action will delete all the folders and file for project!",
             buttons=('Yes', 'No'),
             severity=hou.severityType.Warning,
@@ -222,18 +260,15 @@ class MyProject(QtWidgets.QMainWindow):
             return
 
         try:
-            path = hou.text.expandString("$RBW/config")
-            json_path = os.path.join(path, "project_config.json")
-
-            with open(json_path, "r") as file:
+            with open(self.json_path, "r") as file:
                 self.projects_data = json.load(file)
 
             project_path_delete = None
 
             for project in self.projects_data:
-                if current_item in project:
+                if project_name in project:
 
-                    project_data = project[current_item]
+                    project_data = project[project_name]
                     project_path_delete = project_data['PROJECT_PATH']
                     self.project_data.remove(project)
                     break
@@ -245,12 +280,12 @@ class MyProject(QtWidgets.QMainWindow):
                     except Exception as e:
                         self.update_status(f"Error deleting project directory : {str(e)}", hou.severityType.Error)
 
-            with open(json_path, "w") as file:
+            with open(self.json_path, "w") as file:
                 json.dump(self.project_data, file, sort_keys=True, indent=4)
 
             self.load_projects()
 
-            self.update_status(f"Project {current_item} has been deleted.", hou.severityType.Message)
+            self.update_status(f"Project {project_name} has been deleted.", hou.severityType.Message)
 
 
         except Exception as e:
@@ -393,12 +428,20 @@ class MyProject(QtWidgets.QMainWindow):
                 if current_project in project:
                     project_data = project[current_project]
                     seq_path = os.path.join(project_data['PROJECT_PATH'], "seq", current_sequence).replace(os.sep, "/")
+                    # file_path = seq_path + '/hip'
                     if os.path.exists(seq_path):
                         files = []
 
-                        for file in os.listdir(seq_path):
-                            if os.path.isfile(os.path.join(seq_path, file)):
-                                files.append(file)
+                        # 使用 os.walk 遍历 seq 文件夹及其所有子文件夹
+                        for root, dirs, filenames in os.walk(seq_path):
+                            for filename in filenames:
+                                # 构建从 sequence1 开始的相对路径
+                                relative_path = os.path.relpath(root, seq_path).replace(os.sep, "/")
+                                if relative_path == ".":
+                                    full_path = filename
+                                else:
+                                    full_path = os.path.join(relative_path, filename).replace(os.sep, "/")
+                                files.append(full_path)
 
                         files.sort()
 
@@ -414,51 +457,48 @@ class MyProject(QtWidgets.QMainWindow):
             # hou.ui.displayMessage(error_msg, severity=hou.severityType.Error)
             self.status_line.setText(error_msg)
 
-    def save_project_file(self):
-        """
-        Save the project file to the selected project and sequence folder.
-        """
-
-        if not self.sequence_list.selectedItems():
-            hou.ui.displayMessage("Please select a sequence.", severity=hou.severityType.Error)
-            self.status_line.setText("Please select a sequence.")
-            return
-
-        current_project = self.project_list.currentItem().text()
-        current_sequence = self.sequence_list.currentItem().text()
-
-        for project in self.project_data:
-            if current_project in project:
-                project_data = project[current_project]
-
-                break
-        save_path = os.path.join(project_data['PROJECT_PATH'], "seq", current_sequence).replace(os.sep, "/")
-
-
-        # Prompt user to select a file name
-        file_name, ok = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            "Save Project File",
-            save_path,
-            "Houdini Files (*.hip *.hipnc)"
-        )
-        if not ok or not file_name:
-            self.status_line.setText("File save cancelled.")
-            return
-
-        # Save the file
-        try:
-            hou.hipFile.save(file_name)
-            self.status_line.setText(f"File saved: {file_name}")
-            hou.ui.displayMessage(f"File saved: {file_name}", severity=hou.severityType.Message)
-            self.load_files()
-        except Exception as e:
-            error_msg = f"Error saving file: {str(e)}"
-            hou.ui.displayMessage(error_msg, severity=hou.severityType.Error)
-            self.status_line.setText(error_msg)
-
-
-
+    # def save_project_file(self):
+    #     """
+    #     Save the project file to the selected project and sequence folder.
+    #     """
+    #
+    #     if not self.sequence_list.selectedItems():
+    #         hou.ui.displayMessage("Please select a sequence.", severity=hou.severityType.Error)
+    #         self.status_line.setText("Please select a sequence.")
+    #         return
+    #
+    #     current_project = self.project_list.currentItem().text()
+    #     current_sequence = self.sequence_list.currentItem().text()
+    #
+    #     for project in self.project_data:
+    #         if current_project in project:
+    #             project_data = project[current_project]
+    #
+    #             break
+    #     save_path = os.path.join(project_data['PROJECT_PATH'], "seq", current_sequence).replace(os.sep, "/")
+    #
+    #
+    #     # Prompt user to select a file name
+    #     file_name, ok = QtWidgets.QFileDialog.getSaveFileName(
+    #         self,
+    #         "Save Project File",
+    #         save_path,
+    #         "Houdini Files (*.hip *.hipnc)"
+    #     )
+    #     if not ok or not file_name:
+    #         self.status_line.setText("File save cancelled.")
+    #         return
+    #
+    #     # Save the file
+    #     try:
+    #         hou.hipFile.save(file_name)
+    #         self.status_line.setText(f"File saved: {file_name}")
+    #         hou.ui.displayMessage(f"File saved: {file_name}", severity=hou.severityType.Message)
+    #         self.load_files()
+    #     except Exception as e:
+    #         error_msg = f"Error saving file: {str(e)}"
+    #         hou.ui.displayMessage(error_msg, severity=hou.severityType.Error)
+    #         self.status_line.setText(error_msg)
 
     def open_project_file(self):
         """
@@ -482,6 +522,37 @@ class MyProject(QtWidgets.QMainWindow):
             # hou.ui.displayMessage(f"File opened: {file_path}", severity=hou.severityType.Message)
         except Exception as e:
             self.update_status(f"Error opening file: {str(e)}", hou.severityType.Error)
+
+    def show_save_tool(self):
+        """Show the save tool window"""
+        project_name, project_data = self.get_selected_projects()
+        if not project_name:
+            return
+
+        scene_name = None
+
+        if self.sequence_list.selectedItems():
+            scene_name = self.sequence_list.selectedItems()[0].text()
+
+        else:
+            self.update_status("Please select a sequence.",hou.severityType.Error)
+            return
+
+        # Create new save tool window with the project information
+        if not self.save_tool_window:
+            self.save_tool_window = SaveToolWindow(project_data, scene_name, project_name)
+            # Connect the file saved signal to load the method load_hip_files
+            self.save_tool_window.file_saved.connect(self.load_files)
+        else:
+            # Update existing window with the new project information
+            self.save_tool_window.project_data = project_data
+            self.save_tool_window.scene_name = scene_name
+            self.save_tool_window.project_name = project_name
+            self.save_tool_window.update_project_info()
+            self.save_tool_window.update_preview_path()
+
+        self.save_tool_window.show()
+        self.save_tool_window.raise_()
 
 
 win = MyProject()

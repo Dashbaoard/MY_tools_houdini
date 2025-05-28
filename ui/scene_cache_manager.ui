@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SceneCacheManager</class>
+ <widget class="QWidget" name="SceneCacheManager">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>330</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1200</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Scene Cache Manager</string>
+  </property>
+  <layout class="QVBoxLayout" name="main_layout">
+   <item>
+    <widget class="QGroupBox" name="cache_list_group">
+     <property name="title">
+      <string>Scene Cache Nodes</string>
+     </property>
+     <layout class="QVBoxLayout" name="cache_list_layout">
+      <item>
+       <widget class="QTreeWidget" name="cache_tree">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::ExtendedSelection</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>Node Name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Node Path</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Node Type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Cache Path</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Current Version</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Other Versions</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Latest Modified</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Total Size</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="stats_group">
+     <property name="title">
+      <string>Cache Statistics</string>
+     </property>
+     <layout class="QGridLayout" name="stats_layout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lb_total_nodes">
+        <property name="text">
+         <string>Total Cache Nodes: 0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="lb_total_size">
+        <property name="text">
+         <string>Total Cache Size: 0 MB</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lb_unused_versions">
+        <property name="text">
+         <string>Unused Versions: 0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="button_layout">
+     <item>
+      <widget class="QPushButton" name="bt_scan">
+       <property name="text">
+        <string>Scan Scene</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bt_reveal">
+       <property name="text">
+        <string>Reveal in Explorer</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bt_cleanup">
+       <property name="text">
+        <string>Clean Old Versions</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
