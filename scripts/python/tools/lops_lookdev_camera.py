@@ -62,12 +62,9 @@ def create_lookdev_camera():
 
     # Create or use the camera
     if existing_camera:
-        print('aaa')
         camera = existing_camera
     else:
-        print('----------------')
         camera = UsdGeom.Camera.Define(stage, camera_path)
-        print(camera)
         # Asset settings to the new camera
         camera.GetHorizontalApertureAttr().Set(36.0)
         camera.GetVerticalApertureAttr().Set(24.0)
