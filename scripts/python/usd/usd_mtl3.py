@@ -70,7 +70,7 @@ def export_arnold_standard_surface(stage, usd_material_path, maya_material):
     """导出为 arnold:standard_surface 材质"""
     usd_material = UsdShade.Material.Define(stage, usd_material_path)
     shader = UsdShade.Shader.Define(stage, f"{usd_material_path}/Shader")
-    shader.CreateIdAttr("arnold:standard_surface")
+    shader.CreateIdAttr("ND_standard_surface_surfaceshader")
 
     attribute_map = {
         "baseColor": "base_color",

@@ -17,27 +17,27 @@ import maya.OpenMaya as om
 from pxr import Usd, UsdGeom, Gf, Sdf, Vt
 
 
-def calculate_extent(points):
-    """Calculate mesh extent (bounding box) from points"""
-    if not points:
-        return Vt.Vec3fArray([Gf.Vec3f(0, 0, 0), Gf.Vec3f(0, 0, 0)])
-
-    min_vec = Gf.Vec3f(*[float('inf')] * 3)
-    max_vec = Gf.Vec3f(*[float('-inf')] * 3)
-
-    for p in points:
-        min_vec = Gf.Vec3f(
-            min(min_vec[0], p[0]),
-            min(min_vec[1], p[1]),
-            min(min_vec[2], p[2])
-        )
-        max_vec = Gf.Vec3f(
-            max(max_vec[0], p[0]),
-            max(max_vec[1], p[1]),
-            max(max_vec[2], p[2])
-        )
-
-    return Vt.Vec3fArray([min_vec, max_vec])
+# def calculate_extent(points):
+#     """Calculate mesh extent (bounding box) from points"""
+#     if not points:
+#         return Vt.Vec3fArray([Gf.Vec3f(0, 0, 0), Gf.Vec3f(0, 0, 0)])
+#
+#     min_vec = Gf.Vec3f(*[float('inf')] * 3)
+#     max_vec = Gf.Vec3f(*[float('-inf')] * 3)
+#
+#     for p in points:
+#         min_vec = Gf.Vec3f(
+#             min(min_vec[0], p[0]),
+#             min(min_vec[1], p[1]),
+#             min(min_vec[2], p[2])
+#         )
+#         max_vec = Gf.Vec3f(
+#             max(max_vec[0], p[0]),
+#             max(max_vec[1], p[1]),
+#             max(max_vec[2], p[2])
+#         )
+#
+#     return Vt.Vec3fArray([min_vec, max_vec])
 
 
 def get_mesh_uv_indices(maya_mesh):
