@@ -41,7 +41,7 @@ class JsonToMtlx(QtWidgets.QMainWindow):
         self.setParent(hou.qt.mainWindow(), QtCore.Qt.Window)
         self.setWindowFlags(self.windowFlags())
 
-        ## DATA
+        # DATA
         self.json_data = None
         self.material_nodes = {}
         self.texture_nodes = {}
